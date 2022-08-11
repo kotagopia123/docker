@@ -1,0 +1,133 @@
+# Clone the code from Repo:
+============================
+  git clone https://github.com/dockersamples/example-voting-app.git
+
+  ll
+
+  cd voting-app/
+
+  docker images
+
+# Build Vote Image
+-------------------
+  cd vote
+  docker build -t vote .
+  docker images
+
+# Build Result Image
+--------------------
+  cd ../result/
+  ll
+  docker build -t result .
+  docker images
+
+# Build Worker Image
+---------------------
+  cd ../worker/
+  docker build -t worker .
+  docker images
+
+# pull redis and postgresql images
+----------------------------------
+  docker pull redis:5.0-alpine3.10
+  docker pull postgres:9.4
+  docker images
+
+
+# Launch redis container
+-------------------------
+  docker run -it -d -p 6379 --name redis redis:5.0-alpine3.10
+  docker ps
+
+#Launch vote container
+----------------------
+  docker run -it -d --name vote --link redis:redis -p 5000:80 vote
+  docker ps
+
+## Check the Vote App URL - http://IP:5000/
+
+# Launch the db container
+-------------------------
+  docker run -it -d --name db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -v db-data:/var/lib/postgresql/data postgres:9.4
+  docker ps
+
+# Launch the worker container
+------------------------------
+  docker run -it -d --name worker --link redis:redis --link db:db worker
+  docker ps
+
+# Launch the result container
+------------------------------
+docker run -it -d --name result --link db:db -p "5001:80" -p "5858:5858" result
+docker ps
+
+## Check the Result App URL - http://IP:5001/
+
+# Cleanup the Images and Containers
+------------------------------------
+  docker rm `docker ps -a -q`
+  docker ps
+  docker ps -a
+  docker images
+  docker rmi `docker images -a -q`
+  docker images
+
+
+# Install Docker Compose:
+==========================
+  $ sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+  $ sudo chmod +x /usr/local/bin/docker-compose
+
+  $ sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+  $ docker-compose --version
+
+# Voting Application Deployment using Docker Compose:
+======================================================
+
+  # Download the voting sample Application
+
+  $ git clone https://github.com/dockersamples/example-voting-app.git
+
+  $ cd example-voting-app/
+
+  $ docker ps
+
+
+# Build images and Launch the containers
+-----------------------------------------
+  $ docker-compose up &
+  $ docker-compose ps
+  $ docker ps
+
+## Check the URLs:
+-------------------
+  Voting App - http://IP:5000/
+  Result App - http://IP:5001/
+
+# Cleanup the Images and Containers
+------------------------------------
+  $ docker-compose down
+
+  $ docker-compose ps
+
+  $ docker ps -a
+
+  $ docker images
+
+  $ docker rmi `docker images -a -q`
+
+  $ docker images
+
+Application Files: to change Cats/Dogs -> Swarm/K8s
+====================================================
+  voting-app\result\views\index.html
+  voting-app\vote\app.py
+  voting-app\vote\dotnet\Vote\appsettings.json
+
+# Re-Build images and Launch the containers
+-----------------------------------------
+  $ docker-compose up &
+  $ docker-compose ps
+  $ docker ps
